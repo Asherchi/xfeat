@@ -38,7 +38,7 @@ def warp_corners_and_draw_matches(ref_points, dst_points, img1, img2):
 
     return img_matches, flag, np.sum(mask)
 
-
+# new 
 
 params_path = "/home/asher/data/code/accelerated_features/weights/xfeat.pt"
 params = torch.load(params_path)
