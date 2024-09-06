@@ -161,6 +161,40 @@ class XFeat(nn.Module):
 		return d0['keypoints'][idxs[:, 0]].cpu().numpy(), d1['keypoints'][idxs[:, 1]].cpu().numpy()
 
 
+
+	@torch.inference_mode()
+	def match_lighterglue_resIdx(self, d0, d1):
+		"""
+			Match XFeat sparse features with LightGlue (smaller version) -- currently does NOT support batched inference because of padding, but its possible to implement easily.
+			input:
+				d0, d1: Dict('keypoints', 'scores, 'descriptors', 'image_size (Width, Height)')
+			output:
+				mkpts_0, mkpts_1 -> np.ndarray (N,2) xy coordinate matches from image1 to image2
+				
+		"""
+		if not self.kornia_available:
+			raise RuntimeError('We rely on kornia for LightGlue. Install with: pip install kornia')
+		elif self.lighterglue is None:
+			from modules.lighterglue import LighterGlue
+			self.lighterglue = LighterGlue()
+
+		data = {
+				'keypoints0': d0['keypoints'][None, ...],
+				'keypoints1': d1['keypoints'][None, ...],
+				'descriptors0': d0['descriptors'][None, ...],
+				'descriptors1': d1['descriptors'][None, ...],
+				'image_size0': torch.tensor(d0['image_size']).to(self.dev)[None, ...],
+				'image_size1': torch.tensor(d1['image_size']).to(self.dev)[None, ...]
+		}
+
+		#Dict -> log_assignment: [B x M+1 x N+1] matches0: [B x M] matching_scores0: [B x M] matches1: [B x N] matching_scores1: [B x N] matches: List[[Si x 2]], scores: List[[Si]]
+		out = self.lighterglue(data)
+
+		idxs = out['matches'][0]
+
+		return idxs.cpu().numpy()
+
+
 	@torch.inference_mode()
 	def match_xfeat(self, img1, img2, top_k = None, min_cossim = -1):
 		"""

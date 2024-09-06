@@ -3,10 +3,15 @@ import numpy as np
 import os
 import torch
 import tqdm
+import sys
+'''
+export PYTHONPATH="/home/xavision/miniconda3/envs/xfeat/lib/python3.8/site-packages:$PYTHONPATH"
+'''
+sys.path.append('/home/xavision/miniconda3/envs/xfeat/lib/python3.8/site-packages')
 import cv2
 import matplotlib.pyplot as plt
 
-import cv2
+# import cv2
 import numpy as np
 import time
 
@@ -40,7 +45,7 @@ def warp_corners_and_draw_matches(ref_points, dst_points, img1, img2):
 
 # new 
 
-params_path = "/home/asher/data/code/accelerated_features/weights/xfeat.pt"
+params_path = "/home/xavision/nnd_storage_0/Asher/code/xfeat/weights/xfeat.pt"
 params = torch.load(params_path)
 from modules.xfeat import XFeat as _XFeat
 top_k = 4096
@@ -50,8 +55,8 @@ xfeat = _XFeat(params, top_k=top_k, detection_threshold=detection_threshold)
 
 import os
 
-image_path = "/mnt/c/Users/Asher/Desktop/Data/PV_wheat_field/29e03514870de0e379b36381"
-output_dir = "/mnt/c/Users/Asher/Desktop/Data/openMVG_SFM/29e03514870de0e379b36381_xfeat/matches"
+image_path = "/home/xavision/nnd_storage_0/Asher/data/PV_wheat_field/9822e12f10cd92d001282218"
+output_dir = "/home/xavision/nnd_storage_0/Asher/openmvg_res/9822e12f10cd92d001282218_xfeat/matches"
 if not os.path.exists(output_dir):
     os.makedirs(output_dir)
 
