@@ -72,6 +72,44 @@ def warp_corners_and_draw_matches(ref_points, dst_points, img1, img2):
 
     return img_matches, flag, np.sum(mask)
 
+
+def check_the_results_by_visiualization(output0, output1, matchesIdxL, matchesIdxR, idxNameDict, image_path,
+                                        idxI, idxJ ):
+
+    ''' as following are used for valid thr methods effective. '''
+
+    mkpts_00 = output0['keypoints'][matchesIdxL].cpu().numpy()
+    mkpts_11 = output1['keypoints'][matchesIdxR].cpu().numpy()
+
+    im1Name = idxNameDict[idxI]
+    im2Name = idxNameDict[idxJ]
+    file1 = os.path.join(image_path, im1Name)
+    file2 = os.path.join(image_path, im2Name)
+    im1 = cv2.imread(file1)
+    im2 = cv2.imread(file2)
+    canvas, F_flag, validNums = warp_corners_and_draw_matches(mkpts_00, mkpts_11, im1, im2)
+
+    cv2.imwrite("valid_mathods_effective.png", canvas)
+
+    print("finished the process {} and {}.".format(idxNameDict[idxI], idxNameDict[idxJ]))
+
+    return 
+
+@torch.inference_mode()
+def steer_inference(output0, output1, idxs0, idxs1):
+
+    rot1to2 = 0
+    for r in range(1, 4):
+        
+        output0['descriptors'] = torch.nn.functional.normalize(steerer(output0['descriptors']), dim=-1)
+        new_idxs0, new_idxs1 = xfeat.match(output0['descriptors'], output1['descriptors'], min_cossim=0.9)
+        if len(new_idxs0) > len(idxs0):
+            idxs0 = new_idxs0
+            idxs1 = new_idxs1
+            rot1to2 = r
+
+    return idxs0, idxs1
+
 # new 
 
 steer_pth = "/home/asher/data/code/accelerated_features/weights/xfeat_learn_steer_steerer.pth"
@@ -81,7 +119,7 @@ steerer.eval()
 
 # params_path = "/home/asher/data/code/accelerated_features/weights/xfeat.pt"
 steer_xfeat_pth = "/home/asher/data/code/accelerated_features/weights/xfeat_learn_steer.pth"
-params = torch.load(steer_xfeat_pth)
+params = torch.load(steer_xfeat_pth, map_location='cpu')
 from modules.xfeat import XFeat as _XFeat
 top_k = 4096
 detection_threshold = 0.05
@@ -90,8 +128,8 @@ xfeat = _XFeat(params, top_k=top_k, detection_threshold=detection_threshold)
 
 import os
 
-image_path = "/mnt/c/Users/Asher/Desktop/Data/PV_wheat_field/29e03514870de0e379b36381"
-output_dir = "/mnt/c/Users/Asher/Desktop/Data/openMVG_SFM/29e03514870de0e379b36381_xfeat/matches"
+image_path = "/mnt/c/Users/Asher/Desktop/Data/aiFeature/test/542649ee2bf184f88bcbd560"
+output_dir = "/mnt/c/Users/Asher/Desktop/Data/openMVG_SFM/542649ee2bf184f88bcbd560_test/matches"
 if not os.path.exists(output_dir):
     os.makedirs(output_dir)
 
@@ -180,12 +218,26 @@ for idx, pair in enumerate(matchesPair):
     idxI, idxJ = pair[0], pair[1]
     output0, output1 = featIdxDict[idxI], featIdxDict[idxJ]
 
-    matchesIdx = xfeat.match_lighterglue_resIdx(output0, output1)
+    # matchesIdx = xfeat.match_lighterglue_resIdx(output0, output1)
 
-    if len(matchesIdx) < 50:
+    idxs0, idxs1 = xfeat.match(output0['descriptors'], output1['descriptors'], min_cossim=0.9)
+    # rot1to2 = 0
+    # for r in range(1, 4):
+        
+    #     output0['descriptors'] = torch.nn.functional.normalize(steerer(output0['descriptors']), dim=-1)
+    #     new_idxs0, new_idxs1 = xfeat.match(output0['descriptors'], output1['descriptors'], min_cossim=0.9)
+    #     if len(new_idxs0) > len(idxs0):
+    #         idxs0 = new_idxs0
+    #         idxs1 = new_idxs1
+    #         rot1to2 = r
+    idxs0, idxs1 = steer_inference(output0, output1, idxs0, idxs1)
+
+    if len(idxs0) < 35:
         continue
 
-    matchesIdxL, matchesIdxR = matchesIdx[:, 0], matchesIdx[:, 1]
+    # matchesIdxL, matchesIdxR = matchesIdx[:, 0], matchesIdx[:, 1]
+    
+    matchesIdxL, matchesIdxR = idxs0, idxs1
 		
     mkpts_0 = output0['keypoints'][matchesIdxL].cpu().numpy()
     mkpts_1 = output1['keypoints'][matchesIdxR].cpu().numpy()
@@ -197,6 +249,10 @@ for idx, pair in enumerate(matchesPair):
     matchesIdxL = matchesIdxL[mask>0]
     matchesIdxR = matchesIdxR[mask>0]
     assert matchesIdxL.shape == matchesIdxR.shape
+
+
+    check_the_results_by_visiualization(output0, output1, matchesIdxL, matchesIdxR, idxNameDict, image_path,
+                                        idxI, idxJ )
 
     writeLineList = []
     
@@ -222,21 +278,6 @@ matches_F_file_w.close()
 print("finished all programs.")
 
 
-''' as following are used for valid thr methods effective. '''
 
-    # mkpts_00 = output0['keypoints'][matchesIdxL].cpu().numpy()
-    # mkpts_11 = output1['keypoints'][matchesIdxR].cpu().numpy()
-
-    # im1Name = idxNameDict[idxI]
-    # im2Name = idxNameDict[idxJ]
-    # file1 = os.path.join(image_path, im1Name)
-    # file2 = os.path.join(image_path, im2Name)
-    # im1 = cv2.imread(file1)
-    # im2 = cv2.imread(file2)
-    # canvas, F_flag, validNums = warp_corners_and_draw_matches(mkpts_0, mkpts_1, im1, im2)
-
-    # cv2.imwrite("valid_mathods_effective.png", canvas)
-
-    # print("finished the process {} and {}.".format(idxNameDict[idxI], idxNameDict[idxJ]))
 
 
