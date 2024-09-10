@@ -11,6 +11,31 @@ import os
 import subprocess
 import sys
 import time
+import cv2
+
+def resize_image(imgPath, savePath):
+   
+    # imgPath = "/mnt/c/Users/Asher/Desktop/Data/wheat_alls/5f27de0faace21a85b35739d"
+    # savePath = "/mnt/c/Users/Asher/Desktop/Data/wheat_resize/5f27de0faace21a85b35739d"
+    if not os.path.exists(savePath):
+        os.makedirs(savePath)
+
+    imgList = os.listdir(imgPath)
+
+
+    for fileName in imgList:
+        if fileName.split(".")[-1] != "JPG":
+            continue
+        imgFile = os.path.join(imgPath, fileName)
+        imgMat = cv2.imread(imgFile)
+
+        imgMat = cv2.resize(imgMat, (800, 600))
+        saveFile = os.path.join(savePath, fileName)
+        cv2.imwrite(saveFile, imgMat)
+
+        print("finished img is: ", fileName)
+
+    print("finished.")
 
 
 starTime = time.time()
@@ -28,6 +53,10 @@ real_img_path = "/mnt/c/Users/Asher/Desktop/Data/wheat_resize/5f27de0faace21a85b
 matches_dir = os.path.join(output_dir, "matches")
 reconstruction_dir = os.path.join(output_dir, "reconstruction_sequential")
 camera_file_params = os.path.join(CAMERA_SENSOR_WIDTH_DIRECTORY, "sensor_width_camera_database.txt")
+
+if not os.path.exists(real_img_path):
+   os.makedirs(real_img_path)
+   resize_image(input_dir, real_img_path)
 
 print ("      output_dir : ", output_dir)
 
