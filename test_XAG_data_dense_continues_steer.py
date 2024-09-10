@@ -174,10 +174,10 @@ steerer = torch.nn.Linear(64, 64, bias=False)
 steerer.weight.data = torch.load(steer_pth, map_location='cpu')['weight'][..., 0, 0]
 steerer.eval()
 
-imgPath = "/mnt/c/Users/Asher/Desktop/Data/feat_match_test/29e03514870de0e379b36381/"
-img1file = os.path.join(imgPath, "XAG381_0072.JPG")
-img2file = os.path.join(imgPath, "XAG381_0073.JPG")
-img3file = os.path.join(imgPath, "XAG381_0074.JPG")
+imgPath = "/mnt/c/Users/Asher/Desktop/Data/feat_match_test/7ae2960a4176360b8690d8df/"
+img1file = os.path.join(imgPath, "XAG8df_0132.JPG")
+img2file = os.path.join(imgPath, "XAG8df_0133.JPG")
+img3file = os.path.join(imgPath, "XAG8df_0134.JPG")
 
 assert os.path.isfile(img1file), "the file {} is nots exists.".format(img1file)
 assert os.path.isfile(img2file), "the file {} is nots exists.".format(img2file)

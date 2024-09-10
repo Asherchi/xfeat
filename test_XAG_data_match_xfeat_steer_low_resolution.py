@@ -3,46 +3,17 @@ import numpy as np
 import os
 import torch
 import tqdm
+import sys
+'''
+export PYTHONPATH="/home/xavision/miniconda3/envs/xfeat/lib/python3.8/site-packages:$PYTHONPATH"
+'''
+sys.path.append('/home/xavision/miniconda3/envs/xfeat/lib/python3.8/site-packages')
 import cv2
 import matplotlib.pyplot as plt
 
-import cv2
+# import cv2
 import numpy as np
 import time
-
-
-@torch.inference_mode()
-def match_xfeat_with_steerer(img1, img2, top_k = None, min_cossim = -1):
-    """
-        Simple extractor and MNN matcher.
-        For simplicity it does not support batched mode due to possibly different number of kpts.
-        input:
-            img1 -> torch.Tensor (1,C,H,W) or np.ndarray (H,W,C): grayscale or rgb image.
-            img2 -> torch.Tensor (1,C,H,W) or np.ndarray (H,W,C): grayscale or rgb image.
-            top_k -> int: keep best k features
-        returns:
-            mkpts_0, mkpts_1 -> np.ndarray (N,2) xy coordinate matches from image1 to image2
-    """
-    if top_k is None: top_k = xfeat.top_k
-    img1 = xfeat.parse_input(img1)
-    img2 = xfeat.parse_input(img2)
-
-    out1 = xfeat.detectAndCompute(img1, top_k=top_k)[0]
-    out2 = xfeat.detectAndCompute(img2, top_k=top_k)[0]
-
-    idxs0, idxs1 = xfeat.match(out1['descriptors'], out2['descriptors'], min_cossim=min_cossim)
-    rot1to2 = 0
-    for r in range(1, 4):
-        out1['descriptors'] = torch.nn.functional.normalize(steerer(out1['descriptors']), dim=-1)
-        new_idxs0, new_idxs1 = xfeat.match(out1['descriptors'], out2['descriptors'], min_cossim=min_cossim)
-        if len(new_idxs0) > len(idxs0):
-            idxs0 = new_idxs0
-            idxs1 = new_idxs1
-            rot1to2 = r
-
-    return out1['keypoints'][idxs0].cpu().numpy(), out2['keypoints'][idxs1].cpu().numpy(), rot1to2
-
-
 
 def warp_corners_and_draw_matches(ref_points, dst_points, img1, img2):
     # Calculate the Homography matrix
@@ -73,7 +44,7 @@ def warp_corners_and_draw_matches(ref_points, dst_points, img1, img2):
     return img_matches, flag, np.sum(mask)
 
 
-def check_the_results_by_visiualization(output0, output1, matchesIdxL, matchesIdxR, idxNameDict, image_path,
+def check_the_results_by_visiualization(output0, output1, matchesIdxL, matchesIdxR, idxNameDict, real_img_path,
                                         idxI, idxJ ):
 
     ''' as following are used for valid thr methods effective. '''
@@ -83,8 +54,8 @@ def check_the_results_by_visiualization(output0, output1, matchesIdxL, matchesId
 
     im1Name = idxNameDict[idxI]
     im2Name = idxNameDict[idxJ]
-    file1 = os.path.join(image_path, im1Name)
-    file2 = os.path.join(image_path, im2Name)
+    file1 = os.path.join(real_img_path, im1Name)
+    file2 = os.path.join(real_img_path, im2Name)
     im1 = cv2.imread(file1)
     im2 = cv2.imread(file2)
     canvas, F_flag, validNums = warp_corners_and_draw_matches(mkpts_00, mkpts_11, im1, im2)
@@ -94,6 +65,7 @@ def check_the_results_by_visiualization(output0, output1, matchesIdxL, matchesId
     print("finished the process {} and {}.".format(idxNameDict[idxI], idxNameDict[idxJ]))
 
     return 
+
 
 @torch.inference_mode()
 def steer_inference(output0, output1, idxs0, idxs1):
@@ -109,6 +81,12 @@ def steer_inference(output0, output1, idxs0, idxs1):
             rot1to2 = r
 
     return idxs0, idxs1
+
+# new 
+
+import time
+
+starTime = time.time()
 
 # new 
 
@@ -128,12 +106,15 @@ xfeat = _XFeat(params, top_k=top_k, detection_threshold=detection_threshold)
 
 import os
 
-image_path = "/mnt/c/Users/Asher/Desktop/Data/aiFeature/test/542649ee2bf184f88bcbd560"
-output_dir = "/mnt/c/Users/Asher/Desktop/Data/openMVG_SFM/542649ee2bf184f88bcbd560_test/matches"
+input_dir = "/mnt/c/Users/Asher/Desktop/Data/wheat_alls/5f27de0faace21a85b35739d"
+output_dir = "/mnt/c/Users/Asher/Desktop/Data/openMVG_SFM/5f27de0faace21a85b35739d_lowRes_xfeat_steer/matches"
+real_img_path = "/mnt/c/Users/Asher/Desktop/Data/wheat_resize/5f27de0faace21a85b35739d"
+
 if not os.path.exists(output_dir):
     os.makedirs(output_dir)
 
-fileList = os.listdir(image_path)
+
+fileList = os.listdir(real_img_path)
 print("fileList nums is: ", len(fileList))
 
 image_List = [x for x in fileList if x.endswith(".JPG")]
@@ -153,16 +134,19 @@ max_nums = 0
 '''
 
 # 暴力匹配
-num_len = len(image_List)
-matchesPair = []
-for i in range(num_len):
+# num_len = len(image_List)
+# matchesPair = []
+# for i in range(num_len):
 
-    for j in range(i+1, num_len):
-        pair = [i, j]
-        matchesPair.append(pair)
+#     for j in range(i+1, num_len):
+#         pair = [i, j]
+#         matchesPair.append(pair)
 
-print("exhaustive matches nums is: ", len(matchesPair))
+# print("exhaustive matches nums is: ", len(matchesPair))
+from read_exif_data import run_spatial_search_matches_pair
+matchesPair = run_spatial_search_matches_pair(input_dir, saveFile=output_dir+"/pairs.txt")
 
+print("the valid image matches length is: ", len(matchesPair))
 # 顺序匹配
 
 
@@ -176,7 +160,7 @@ featIdxDict = dict()
 
 for idx, img in enumerate(image_List):
     idxNameDict[idx] = img
-    imgFilePath = os.path.join(image_path, img)
+    imgFilePath = os.path.join(real_img_path, img)
 
     assert os.path.isfile(imgFilePath), "the file {} is nots exists.".format(imgFilePath)
     im_Mat = np.array(cv2.imread(imgFilePath))
@@ -210,7 +194,6 @@ matches_F_file = os.path.join(output_dir, "matches.f.txt")
 matches_F_file_w = open(matches_F_file, 'w')
 
 pairSz = len(matchesPair)
-
 for idx, pair in enumerate(matchesPair):
 
     idxI, idxJ = pair[0], pair[1]
@@ -239,8 +222,8 @@ for idx, pair in enumerate(matchesPair):
     assert matchesIdxL.shape == matchesIdxR.shape
 
 
-    check_the_results_by_visiualization(output0, output1, matchesIdxL, matchesIdxR, idxNameDict, image_path,
-                                        idxI, idxJ )
+    # check_the_results_by_visiualization(output0, output1, matchesIdxL, matchesIdxR, idxNameDict, real_img_path,
+    #                                     idxI, idxJ )
 
     writeLineList = []
     
@@ -265,7 +248,6 @@ for idx, pair in enumerate(matchesPair):
 matches_F_file_w.close()
 print("finished all programs.")
 
+endTime = time.time()
 
-
-
-
+print("the spends times is: ", (endTime - starTime)/60)

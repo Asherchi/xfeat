@@ -45,7 +45,7 @@ def warp_corners_and_draw_matches(ref_points, dst_points, img1, img2):
 
 # new 
 
-params_path = "/home/xavision/nnd_storage_0/Asher/code/xfeat/weights/xfeat.pt"
+params_path = "/home/asher/myVersion/xfeat/weights/xfeat.pt"
 params = torch.load(params_path)
 from modules.xfeat import XFeat as _XFeat
 top_k = 4096
@@ -55,8 +55,8 @@ xfeat = _XFeat(params, top_k=top_k, detection_threshold=detection_threshold)
 
 import os
 
-image_path = "/home/xavision/nnd_storage_0/Asher/data/PV_wheat_field/9822e12f10cd92d001282218"
-output_dir = "/home/xavision/nnd_storage_0/Asher/openmvg_res/9822e12f10cd92d001282218_xfeat/matches"
+image_path = "/mnt/c/Users/Asher/Desktop/Data/PV_wheat_field/29e03514870de0e379b36381"
+output_dir = "/mnt/c/Users/Asher/Desktop/Data/openMVG_SFM/29e03514870de0e379b36381_xfeat_match/matches"
 if not os.path.exists(output_dir):
     os.makedirs(output_dir)
 
@@ -147,7 +147,7 @@ for idx, pair in enumerate(matchesPair):
 
     matchesIdx = xfeat.match_lighterglue_resIdx(output0, output1)
 
-    if len(matchesIdx) < 50:
+    if len(matchesIdx) < 30:
         continue
 
     matchesIdxL, matchesIdxR = matchesIdx[:, 0], matchesIdx[:, 1]
@@ -156,7 +156,7 @@ for idx, pair in enumerate(matchesPair):
     mkpts_1 = output1['keypoints'][matchesIdxR].cpu().numpy()
 
     F, mask = cv2.findFundamentalMat(mkpts_0, mkpts_1, cv2.FM_RANSAC, 3, 0.999)
-    if mask.sum() < 50:
+    if mask.sum() < 30:
         continue
     mask = mask.flatten()
     matchesIdxL = matchesIdxL[mask>0]
