@@ -1,11 +1,14 @@
 
 
-# Indicate the openMVG binary directory
-# OPENMVG_SFM_BIN = "/home/asher/code/openMVG_Build/Linux-x86_64-RELEASE"
-OPENMVG_SFM_BIN = "/home/asher/myVersion/openMVG/build_change/Linux-x86_64-Release"
+# 172.31.178.53
+OPENMVG_SFM_BIN = "/home/xavision/nnd_storage_0/Asher/code/openMVG/build/Linux-x86_64-Release"
+CAMERA_SENSOR_WIDTH_DIRECTORY = "/home/xavision/nnd_storage_0/Asher/code/openMVG/src/software/SfM" + "/../../openMVG/exif/sensor_width_database"
 
-# Indicate the openMVG camera sensor width directory
-CAMERA_SENSOR_WIDTH_DIRECTORY = "/home/asher/myVersion/openMVG/src/software/SfM" + "/../../openMVG/exif/sensor_width_database"
+# local 
+# OPENMVG_SFM_BIN = "/home/asher/myVersion/openMVG/build_change/Linux-x86_64-Release"
+# CAMERA_SENSOR_WIDTH_DIRECTORY = "/home/asher/myVersion/openMVG/src/software/SfM" + "/../../openMVG/exif/sensor_width_database"
+
+
 
 import os
 import subprocess

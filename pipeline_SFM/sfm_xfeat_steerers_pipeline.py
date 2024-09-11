@@ -25,6 +25,15 @@ sys.path.append("/home/asher/myVersion/xfeat")
 
 from modules.xfeat import XFeat as _XFeat
 
+# 172.31.178.53
+OPENMVG_SFM_BIN = "/home/xavision/nnd_storage_0/Asher/code/openMVG/build/Linux-x86_64-Release"
+CAMERA_SENSOR_WIDTH_DIRECTORY = "/home/xavision/nnd_storage_0/Asher/code/openMVG/src/software/SfM" + "/../../openMVG/exif/sensor_width_database"
+
+# local 
+# OPENMVG_SFM_BIN = "/home/asher/myVersion/openMVG/build_change/Linux-x86_64-Release"
+# CAMERA_SENSOR_WIDTH_DIRECTORY = "/home/asher/myVersion/openMVG/src/software/SfM" + "/../../openMVG/exif/sensor_width_database"
+
+
 def warp_corners_and_draw_matches(ref_points, dst_points, img1, img2):
     # Calculate the Homography matrix
     # H, mask = cv2.findHomography(ref_points, dst_points, cv2.USAC_MAGSAC, 3.5, maxIters=1_000, confidence=0.999)
@@ -285,10 +294,10 @@ if __name__ == "__main__":
     ''' run sfm '''
 
 
-    OPENMVG_SFM_BIN = "/home/asher/myVersion/openMVG/build_change/Linux-x86_64-Release"
+    # OPENMVG_SFM_BIN = "/home/asher/myVersion/openMVG/build_change/Linux-x86_64-Release"
 
     # Indicate the openMVG camera sensor width directory
-    CAMERA_SENSOR_WIDTH_DIRECTORY = "/home/asher/myVersion/openMVG/src/software/SfM" + "/../../openMVG/exif/sensor_width_database"
+    # CAMERA_SENSOR_WIDTH_DIRECTORY = "/home/asher/myVersion/openMVG/src/software/SfM" + "/../../openMVG/exif/sensor_width_database"
 
 
 
