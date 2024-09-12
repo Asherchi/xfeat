@@ -293,14 +293,6 @@ if __name__ == "__main__":
 
     ''' run sfm '''
 
-
-    # OPENMVG_SFM_BIN = "/home/asher/myVersion/openMVG/build_change/Linux-x86_64-Release"
-
-    # Indicate the openMVG camera sensor width directory
-    # CAMERA_SENSOR_WIDTH_DIRECTORY = "/home/asher/myVersion/openMVG/src/software/SfM" + "/../../openMVG/exif/sensor_width_database"
-
-
-
     matches_dir = os.path.join(output_dir, "matches")
     reconstruction_dir = os.path.join(output_dir, "reconstruction_sequential")
     camera_file_params = os.path.join(CAMERA_SENSOR_WIDTH_DIRECTORY, "sensor_width_camera_database.txt")

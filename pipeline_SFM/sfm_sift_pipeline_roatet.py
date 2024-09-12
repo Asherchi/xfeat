@@ -1,4 +1,6 @@
-
+'''
+export PYTHONPATH="/home/xavision/miniconda3/envs/xfeat/lib/python3.8/site-packages:$PYTHONPATH"
+'''
 
 import os
 import subprocess
@@ -36,11 +38,20 @@ starTime = time.time()
 
 
 # 172.31.178.53
-input_dir = "/home/xavision/nnd_storage_0/Asher/data/PV_wheat_all/6ecc5b90e35f16fd08d58391"
-output_dir = "/home/xavision/nnd_storage_0/Asher/openmvg_res/240912/6ecc5b90e35f16fd08d58391_sift"
+input_dir = "/home/xavision/nnd_storage_0/Asher/data/PV_wheat_all/6ecc5b90e35f16fd08d58391/rotate1"
+output_dir = "/home/xavision/nnd_storage_0/Asher/openmvg_res/240911/6ecc5b90e35f16fd08d58391_sift_rotate1"
 real_img_path = "/home/xavision/nnd_storage_0/Asher/data/PV_wheat_all/resize/6ecc5b90e35f16fd08d58391"
-real_img_path = input_dir
 
+# input_dir = "/home/xavision/nnd_storage_0/Asher/data/PV_wheat_all/6ecc5b90e35f16fd08d58391"
+# output_dir = "/home/xavision/nnd_storage_0/Asher/openmvg_res/240911/6ecc5b90e35f16fd08d58391_sift_1"
+# real_img_path = "/home/xavision/nnd_storage_0/Asher/data/PV_wheat_all/resize/6ecc5b90e35f16fd08d58391"
+
+if os.path.exists(output_dir):
+    import shutil
+    shutil.rmtree(output_dir)
+    if not os.path.exists(output_dir):
+        print("the path has been delete.")
+        os.makedirs(output_dir)
 # local
 # input_dir = "/mnt/c/Users/Asher/Desktop/Data/wheat_alls/5f27de0faace21a85b35739d"
 # output_dir = "/mnt/c/Users/Asher/Desktop/Data/openMVG_SFM/5f27de0faace21a85b35739d_lowRes_sift"
@@ -59,9 +70,9 @@ matches_dir = os.path.join(output_dir, "matches")
 reconstruction_dir = os.path.join(output_dir, "reconstruction_sequential")
 camera_file_params = os.path.join(CAMERA_SENSOR_WIDTH_DIRECTORY, "sensor_width_camera_database.txt")
 
-# if not os.path.exists(real_img_path):
-#    os.makedirs(real_img_path)
-#    resize_image(input_dir, real_img_path)
+if not os.path.exists(real_img_path):
+   os.makedirs(real_img_path)
+   resize_image(input_dir, real_img_path)
 
 print ("      output_dir : ", output_dir)
 
@@ -78,7 +89,7 @@ print ("1. Intrinsics analysis")
 '''
 pIntrisics = subprocess.Popen( [os.path.join(OPENMVG_SFM_BIN, "openMVG_main_SfMInit_ImageListing"),  
                                 "-i", real_img_path, "-o", matches_dir, "-d", camera_file_params, 
-                                "-k","862.0;0.0;966.0;0.0;862.0;742.0;0.0;0.0;1.0"] )
+                                "-k","344.8;0.0;386.4;0.0;344.8;296.8;0.0;0.0;1.0"] )
 pIntrisics.wait()
 
 print ("2. Compute features")
@@ -87,9 +98,13 @@ pFeatures = subprocess.Popen( [os.path.join(OPENMVG_SFM_BIN, "openMVG_main_Compu
 pFeatures.wait()
 
 print ("3. Compute matching pairs")
-
 from read_exif_data import run_spatial_search_matches_pair
-run_spatial_search_matches_pair(imagesPath=input_dir, saveFile=matches_dir+"/pairs.txt", topK=13)
+run_spatial_search_matches_pair(imagesPath=os.path.dirname(input_dir), saveFile=matches_dir+"/pairs.txt", topK=13)
+
+# print ("3. Compute matching pairs")
+# pPairs = subprocess.Popen( [os.path.join(OPENMVG_SFM_BIN, "openMVG_main_PairGenerator"),
+#                             "-i", matches_dir+"/sfm_data.json", "-o" , matches_dir + "/pairs.txt" ] )
+# pPairs.wait()
 
 print ("4. Compute matches")
 pMatches = subprocess.Popen( [os.path.join(OPENMVG_SFM_BIN, "openMVG_main_ComputeMatches"),  

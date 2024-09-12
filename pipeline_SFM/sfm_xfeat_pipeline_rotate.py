@@ -28,7 +28,8 @@ export PYTHONPATH="/home/xavision/miniconda3/envs/xfeat/lib/python3.8/site-packa
 '''
 
 # 172.31.178.53
-OPENMVG_SFM_BIN = "/home/xavision/nnd_storage_0/Asher/code/openMVG/build/Linux-x86_64-Release"
+OPENMVG_SFM_BIN = "/home/xavision/nnd_storage_0/Asher/code/origin/openMVG/build/Linux-x86_64-Release"
+# OPENMVG_SFM_BIN = "/home/xavision/nnd_storage_0/Asher/code/openMVG/build/Linux-x86_64-Release"
 CAMERA_SENSOR_WIDTH_DIRECTORY = "/home/xavision/nnd_storage_0/Asher/code/openMVG/src/software/SfM" + "/../../openMVG/exif/sensor_width_database"
 
 # local 
@@ -85,11 +86,11 @@ if __name__ == "__main__":
 
     # import os
 
-    input_dir = "/home/xavision/nnd_storage_0/Asher/data/PV_wheat_all/6ecc5b90e35f16fd08d58391"
-    output_dir = "/home/xavision/nnd_storage_0/Asher/openmvg_res/240911/6ecc5b90e35f16fd08d58391_lowRes_xfeat"
+    input_dir = "/home/xavision/nnd_storage_0/Asher/data/PV_wheat_all/6ecc5b90e35f16fd08d58391/rotate1"
+    output_dir = "/home/xavision/nnd_storage_0/Asher/openmvg_res/240911/6ecc5b90e35f16fd08d58391_xfeat_rotate1"
     real_img_path = "/home/xavision/nnd_storage_0/Asher/data/PV_wheat_all/resize/6ecc5b90e35f16fd08d58391"
     #    sift 文件存放的路径 
-    sift_data_path = "/home/xavision/nnd_storage_0/Asher/openmvg_res/240911/6ecc5b90e35f16fd08d58391_lowRes_sift"
+    sift_data_path = "/home/xavision/nnd_storage_0/Asher/openmvg_res/240911/6ecc5b90e35f16fd08d58391_sift_rotate1"
     
     if not os.path.exists(real_img_path):
         from sfm_sift_pipeline import resize_image
@@ -229,11 +230,6 @@ if __name__ == "__main__":
         执行sfm
     '''
 
-    # OPENMVG_SFM_BIN = "/home/asher/myVersion/openMVG/build_change/Linux-x86_64-Release"
-
-    # CAMERA_SENSOR_WIDTH_DIRECTORY = "/home/asher/myVersion/openMVG/src/software/SfM" + "/../../openMVG/exif/sensor_width_database"
-
-
     matches_dir = os.path.join(output_dir, "matches")
     reconstruction_dir = os.path.join(output_dir, "reconstruction_sequential")
     camera_file_params = os.path.join(CAMERA_SENSOR_WIDTH_DIRECTORY, "sensor_width_camera_database.txt")
@@ -241,12 +237,6 @@ if __name__ == "__main__":
 
     if not os.path.exists(output_dir):
         os.mkdir(output_dir)
-
-
-    '''
-        标定的相机内参：分辨率 2000 x 1500  "-k","862.0;0.0;966.0;0.0;862.0;742.0;0.0;0.0;1.0"
-        
-    '''
 
     # Create the reconstruction if not present
     if not os.path.exists(reconstruction_dir):
